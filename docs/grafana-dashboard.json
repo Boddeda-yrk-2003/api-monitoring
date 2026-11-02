@@ -1,0 +1,214 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "title": "APIGuard · FastAPI Monitoring",
+  "uid": "apiguard-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "endpoint",
+        "label": "Endpoint",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "query": "label_values(apiguard_endpoint_up, endpoint)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "current": { "selected": true, "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Service status",
+      "id": 1,
+      "gridPos": { "h": 5, "w": 4, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [{ "expr": "apiguard_service_up", "legendFormat": "up", "refId": "A" }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red", "index": 0 } } },
+            { "type": "value", "options": { "1": { "text": "UP", "color": "green", "index": 1 } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Uptime (24h)",
+      "id": 2,
+      "gridPos": { "h": 5, "w": 5, "x": 4, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "avg_over_time(apiguard_endpoint_up{endpoint=~\"$endpoint\"}[24h]) * 100", "legendFormat": "uptime %", "refId": "A" }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area" },
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": 99 }, { "color": "green", "value": 99.9 }] } },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "p95 latency",
+      "id": 3,
+      "gridPos": { "h": 5, "w": 5, "x": 9, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum by (le) (rate(apiguard_monitor_check_duration_seconds_bucket{endpoint=~\"$endpoint\"}[5m])))", "legendFormat": "p95", "refId": "A" }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area" },
+      "fieldConfig": {
+        "defaults": { "unit": "s",
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 3 }] } },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Failed-check rate (5m)",
+      "id": 4,
+      "gridPos": { "h": 5, "w": 5, "x": 14, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "sum(rate(apiguard_monitor_checks_total{outcome=\"failure\",endpoint=~\"$endpoint\"}[5m])) / sum(rate(apiguard_monitor_checks_total{endpoint=~\"$endpoint\"}[5m])) * 100", "legendFormat": "error rate", "refId": "A" }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area" },
+      "fieldConfig": {
+        "defaults": { "unit": "percent",
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 5 }, { "color": "red", "value": 20 }] } },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Open incidents",
+      "id": 5,
+      "gridPos": { "h": 5, "w": 5, "x": 19, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [{ "expr": "sum(apiguard_incidents_open)", "legendFormat": "incidents", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 3 }] } },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Endpoint availability",
+      "id": 6,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [{ "expr": "apiguard_endpoint_up{endpoint=~\"$endpoint\"}", "legendFormat": "{{endpoint}}", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": { "min": 0, "max": 1, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 12, "showPoints": "never" } },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Probe latency (avg vs p95)",
+      "id": 7,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "sum by (endpoint) (rate(apiguard_monitor_check_duration_seconds_sum{endpoint=~\"$endpoint\"}[5m])) / sum by (endpoint) (rate(apiguard_monitor_check_duration_seconds_count{endpoint=~\"$endpoint\"}[5m]))", "legendFormat": "avg {{endpoint}}", "refId": "A" },
+        { "expr": "histogram_quantile(0.95, sum by (le, endpoint) (rate(apiguard_monitor_check_duration_seconds_bucket{endpoint=~\"$endpoint\"}[5m])))", "legendFormat": "p95 {{endpoint}}", "refId": "B" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 8, "showPoints": "never" } },
+        "overrides": []
+      },
+      "thresholds": [
+        {
+          "mode": "absolute",
+          "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": null }],
+          "visible": true,
+          "placement": { "mode": "series" }
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Inbound request rate by status",
+      "id": 8,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "sum by (status_code) (rate(apiguard_http_requests_total[5m]))", "legendFormat": "HTTP {{status_code}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "bars", "fillOpacity": 70, "stacking": { "mode": "normal" } } }, "overrides": [] }
+    },
+    {
+      "type": "timeseries",
+      "title": "Error-rate trend (failed checks / total)",
+      "id": 9,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "sum(rate(apiguard_monitor_checks_total{outcome=\"failure\"}[5m])) / sum(rate(apiguard_monitor_checks_total[5m])) * 100", "legendFormat": "error rate %", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10 } },
+        "overrides": []
+      },
+      "thresholds": [
+        { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 5 }], "visible": true, "placement": { "mode": "series" } }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Open incidents by rule",
+      "id": 10,
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 21 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [{ "expr": "sum by (rule) (apiguard_incidents_open)", "legendFormat": "{{rule}}", "refId": "A" }],
+      "options": { "displayMode": "gradient", "orientation": "horizontal" },
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } }, "overrides": [] }
+    },
+    {
+      "type": "table",
+      "title": "Endpoint SLO snapshot",
+      "id": 11,
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 21 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        { "expr": "avg_over_time(apiguard_endpoint_up[1h]) * 100", "legendFormat": "uptime1h", "refId": "A", "format": "table", "instant": true },
+        { "expr": "apiguard_endpoint_latency_seconds", "legendFormat": "latency", "refId": "B", "format": "table", "instant": true },
+        { "expr": "apiguard_endpoint_up", "legendFormat": "up", "refId": "C", "format": "table", "instant": true }
+      ],
+      "transformations": [
+        { "id": "merge", "options": {} },
+        { "id": "organize", "options": { "renameByName": { "Value #A": "Uptime 1h %", "Value #B": "Latency (s)", "Value #C": "Up", "endpoint": "Endpoint" } } }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [] }
+    }
+  ],
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "Prometheus datasource scraping /metrics",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ]
+}

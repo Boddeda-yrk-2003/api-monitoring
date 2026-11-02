@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: apiguard
+    metrics_path: /metrics
+    static_configs:
+      # use "apiguard:8000" when Prometheus runs in the same Docker network
+      - targets: ['host.docker.internal:8000']
+        labels:
+          service: apiguard
+          env: local

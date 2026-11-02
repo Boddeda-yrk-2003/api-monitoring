@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# React / Node
+node_modules/
+dist/
+build/
+
+# Python cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# Generated runtime alert data
+backend/data/alert-outbox/
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal

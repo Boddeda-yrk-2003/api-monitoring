@@ -1,0 +1,28 @@
+APIGuard · Automated Test Report
+Generated: 2026-11-01 17:52:30 UTC
+Command:   cd backend && python -m pytest -q
+Bootstrap: conftest starts a private uvicorn on :8123 with backend/data/apiguard_test.db (hermetic)
+
+  tests/test_api_and_monitoring.py::test_health_endpoint PASSED            [  4%]
+  tests/test_api_and_monitoring.py::test_users_and_products PASSED         [  9%]
+  tests/test_api_and_monitoring.py::test_user_not_found_returns_404 PASSED [ 13%]
+  tests/test_api_and_monitoring.py::test_secure_data_requires_api_key PASSED [ 18%]
+  tests/test_api_and_monitoring.py::test_simulate_error_returns_500_and_is_captured PASSED [ 22%]
+  tests/test_api_and_monitoring.py::test_simulate_timeout_is_slow PASSED   [ 27%]
+  tests/test_api_and_monitoring.py::test_simulate_rate_limit PASSED        [ 31%]
+  tests/test_api_and_monitoring.py::test_simulate_auth_error PASSED        [ 36%]
+  tests/test_api_and_monitoring.py::test_summary_shape PASSED              [ 40%]
+  tests/test_api_and_monitoring.py::test_timeseries_and_endpoints PASSED   [ 45%]
+  tests/test_api_and_monitoring.py::test_probe_cycle_records_checks PASSED [ 50%]
+  tests/test_api_and_monitoring.py::test_prometheus_metrics_exposed PASSED [ 54%]
+  tests/test_api_and_monitoring.py::test_scenario_detection[auth-AUTH_FAILURE-authentication] PASSED [ 59%]
+  tests/test_api_and_monitoring.py::test_scenario_detection[server_error-SERVER_ERROR-server_error] PASSED [ 63%]
+  tests/test_api_and_monitoring.py::test_scenario_detection[rate_limit-RATE_LIMIT-rate_limit] PASSED [ 68%]
+  tests/test_api_and_monitoring.py::test_scenario_detection[slow_response-SLOW_RESPONSE-latency] PASSED [ 72%]
+  tests/test_api_and_monitoring.py::test_scenario_detection[health_failure-HEALTH_CHECK_FAILED-health] PASSED [ 77%]
+  tests/test_api_and_monitoring.py::test_scenario_detection[downtime-API_DOWN-availability] PASSED [ 81%]
+  tests/test_api_and_monitoring.py::test_server_error_captures_traceback_evidence PASSED [ 86%]
+  tests/test_api_and_monitoring.py::test_incident_lifecycle_and_dedupe PASSED [ 90%]
+  tests/test_api_and_monitoring.py::test_notification_channel_test PASSED  [ 95%]
+  tests/test_api_and_monitoring.py::test_settings_update PASSED            [100%]
+  ============================== 22 passed in 6.03s ==============================
